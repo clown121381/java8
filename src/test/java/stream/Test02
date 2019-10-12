@@ -1,0 +1,199 @@
+package stream;
+
+
+import lambda.entity.Employee;
+import org.junit.Test;
+
+import javax.jnlp.IntegrationService;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class Test02 {
+    /*
+        映射
+        map--接受lambda，将参数转换成其他形式或者提取信息，接受一个函数作为参数，该函数会被应用到每一个元素上，并且映射成一个新元素。
+        flatMap--接受一个函数作为参数，将其中的每一个值都换成另一个流，然后把所有的流连城一个流
+     */
+    List<Employee> employees = Arrays.asList(new Employee("张三", 20, 4000.00),
+            new Employee("李四", 21, 5000.00),
+            new Employee("王五", 22, 8000.00),
+            new Employee("赵六", 24, 1000.00),
+            new Employee("赵六", 24, 1000.00),
+            new Employee("赵六", 24, 1000.00),
+            new Employee("赵六", 24, 1000.00),
+            new Employee("呵呵", 30, 9000.00));
+
+
+    @Test
+    public void test1(){
+        List<String> list = Arrays.asList("aaa","bbb","ccc","ddd","eee");
+        list.stream()
+                //接受函数式接口对流中的每一个元素都执行函数式接口的操作，然后将结果映射
+                .map(String::toUpperCase)
+                .forEach(System.out::println);
+        employees.stream()
+                .map(Employee::getName)
+                .forEach(System.out::println);
+    }
+
+    @Test
+    public void test2(){
+        List<String> list = Arrays.asList("aaa","bbb","ccc","ddd","eee");
+
+        //Stream<Stream<Character>>
+        list.stream()
+                //map本身返回的就是一个流需要对流中的流操作
+                .map(Test02::filterCharacter).forEach(s->s.forEach(System.out::print));
+
+
+        list.stream()
+                //扁平流 把流中的流转化成一个大流
+                .flatMap(Test02::filterCharacter)
+                .forEach(System.out::println);
+    }
+    public static Stream<Character> filterCharacter(String str){
+        List<Character> list = new ArrayList<>();
+        for(char c : str.toCharArray()){
+            list.add(c);
+        }
+        return list.stream();
+    }
+
+
+    @Test
+    public void test3(){
+        employees.stream()
+                .sorted(Comparator.comparing(Employee::getSalary))
+                .forEach(System.out::print);
+    }
+
+    @Test
+    public void test4(){
+        /*
+            查找与匹配
+            allMatch--检查是否匹配所有元素
+            anyMatch--检查至少匹配值一个
+            noneMatch--夹查是否没有匹配所有元素
+
+            findFirst--返回第一个元素
+            findAny--返回大哥前元素中任意一个
+            count--统计元素个数
+            max--返回流中的最大值
+            min--返回流中的最小值
+
+         */
+
+        List<Emp> emp = Arrays.asList(
+                new Emp("zhangsan",18,9999.99, Emp.Status.FREE),
+                new Emp("lisi",58,5555.55, Emp.Status.BUSY),
+                new Emp("wangwu",26,3333.33, Emp.Status.VOCATION),
+                new Emp("zhaoliu",36,6666.66, Emp.Status.FREE),
+                new Emp("tianqi",12,8888.88, Emp.Status.BUSY));
+
+
+        boolean allBusy = emp.stream().allMatch(e->e.getStatus().equals(Emp.Status.BUSY));
+        boolean anyBusy = emp.stream().anyMatch(e->e.getStatus().equals(Emp.Status.BUSY));
+
+        System.out.println("all busy"+allBusy);
+        System.out.println("any busy"+anyBusy);
+
+        Optional<Emp> first = emp.stream().findFirst();
+        Optional<Emp> max = emp.stream().min(Comparator.comparing(Emp::getSalary));
+
+        long count = emp.stream().count();
+        System.out.println(first.get());
+        System.out.println(max.get());
+        System.out.println(count);
+
+    }
+}
+
+class Emp{
+    private String name;
+    private Integer age;
+    private Double salary;
+    private Status status;
+
+    @Override
+    public String toString() {
+        return "Emp{" +
+                "name='" + name + '\'' +
+                ", age=" + age +
+                ", salary=" + salary +
+                ", status=" + status +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Emp emp = (Emp) o;
+        return Objects.equals(name, emp.name) &&
+                Objects.equals(age, emp.age) &&
+                Objects.equals(salary, emp.salary) &&
+                status == emp.status;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, age, salary, status);
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public Integer getAge() {
+        return age;
+    }
+
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    public Double getSalary() {
+        return salary;
+    }
+
+    public void setSalary(Double salary) {
+        this.salary = salary;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public Emp(String name, Integer age, Double salary, Status status) {
+        this.name = name;
+        this.age = age;
+        this.salary = salary;
+        this.status = status;
+    }
+
+    public enum Status{
+        FREE,
+        BUSY,
+        VOCATION
+    }
+
+}
+
+
+
+
+
+
+
+
+
+
